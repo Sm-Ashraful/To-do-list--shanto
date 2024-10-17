@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Tasks</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <h2>Your Tasks</h2>
+    <div class="">
+      <p>Total Tasks: {TOTAL_TASKS}</p>
+      <p>Completed Tasks: {COMPLETED_TASKS}</p>
+    </div>
+    <form action="/" method="POST">
+      <input type="text" name="task" placeholder="New task..." required />
+      <label for="due_date">Due Date:</label>
+      <input type="date" name="due_date" required />
+      <button type="submit">Add Task</button>
+    </form>
+    <ul>
+      {TASK_LIST}
+    </ul>
+    <p><a href="/logout">Logout</a></p>
+  </body>
+</html>

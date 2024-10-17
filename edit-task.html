@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Task</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <h2>Edit Task</h2>
+    <form method="POST" action="/edit-task">
+      <input type="hidden" name="task_id" value="{{ task_id }}">
+      <input type="text" name="updated_task" value="{{ task }}" required>
+      
+      <label for="status">Status:</label>
+      <select name="status" id="status">
+        <option value="Not Started" {{ 'selected' if task_status == "Not Started" else '' }}>Not Started</option>
+        <option value="In Progress" {{ 'selected' if task_status == "In Progress" else '' }}>In Progress</option>
+        <option value="Completed" {{ 'selected' if task_status == "Completed" else '' }}>Completed</option>
+      </select>
+
+      <button type="submit">Save</button>
+    </form>
+
+    <p><a href="/tasks">Back to tasks</a></p>
+  </body>
+</html>
