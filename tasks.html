@@ -3,24 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <title>Your Tasks</title>
-    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <h2>Your Tasks</h2>
-    <div class="">
-      <p>Total Tasks: {TOTAL_TASKS}</p>
-      <p>Completed Tasks: {COMPLETED_TASKS}</p>
+    <div class="container">
+      <div class="tasks-content">
+        <div class="tasks-container">
+          <div class="stats-container">
+            <h2 class="title">TASKS COMPLETED</h2>
+            <div class="numbers">
+              <p>{COMPLETED_TASKS} / {TOTAL_TASKS}</p>
+              <p></p>
+            </div>
+          </div>
+          <form action="/" method="POST">
+            <div class="task-form">
+              <input
+                type="text"
+                name="task"
+                class="task-input"
+                placeholder="New task..."
+                required
+              />
+              <input type="date" name="due_date" required class="date" />
+              <button type="submit" class="add-task">Add Task</button>
+            </div>
+          </form>
+          <h2 class="title">My Tasks</h2>
+          <ul class="tasks-list">
+            {TASK_LIST}
+          </ul>
+        </div>
+      </div>
     </div>
-    <form action="/" method="POST">
-      <input type="text" name="task" placeholder="New task..." required />
-      <label for="due_date">Due Date:</label>
-      <input type="date" name="due_date" required />
-      <button type="submit">Add Task</button>
-    </form>
-    <ul>
-      {TASK_LIST}
-    </ul>
-    <p><a href="/logout">Logout</a></p>
   </body>
 </html>

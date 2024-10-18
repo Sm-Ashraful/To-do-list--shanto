@@ -4,24 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Task</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
   </head>
   <body>
-    <h2>Edit Task</h2>
-    <form method="POST" action="/edit-task">
-      <input type="hidden" name="task_id" value="{{ task_id }}">
-      <input type="text" name="updated_task" value="{{ task }}" required>
-      
-      <label for="status">Status:</label>
-      <select name="status" id="status">
-        <option value="Not Started" {{ 'selected' if task_status == "Not Started" else '' }}>Not Started</option>
-        <option value="In Progress" {{ 'selected' if task_status == "In Progress" else '' }}>In Progress</option>
-        <option value="Completed" {{ 'selected' if task_status == "Completed" else '' }}>Completed</option>
-      </select>
+    <div class="">
+    <div class="logout">
+        <p><a href="/logout">Logout</a></p>
+      </div>
+      <p><a href="/tasks" style="display: flex; justify-self: flex-start; padding-left: 50px; padding-top: 25px;">Back to tasks</a></p>
 
-      <button type="submit">Save</button>
-    </form>
+      </div>
+    <div class="container">
+      <div class="tasks-content">
 
-    <p><a href="/tasks">Back to tasks</a></p>
+      <div class="tasks-container">
+
+        <div class="current-task">
+          <p><strong>Task:</strong> {{ task }}</p>
+          <p><strong>Status:</strong> {{ task_status }}</p>
+        </div>
+      <h2 class="title">Edit Task</h2>
+      <form method="POST" action="/edit-task">
+        <input type="hidden" name="task_id" value="{{ task_id }}">
+        <div class="task-form">
+          <input type="text" name="updated_task" value="{{ task }}" required class="task-input">
+          <select name="status" id="status">
+            <option value="Not Started" {{ 'selected' if task_status == "Not Started" else '' }}>Not Started</option>
+            <option value="In Progress" {{ 'selected' if task_status == "In Progress" else '' }}>In Progress</option>
+            <option value="Completed" {{ 'selected' if task_status == "Completed" else '' }}>Completed</option>
+          </select>
+          <button type="submit" class="save-task">Save</button>
+        </div>
+      </form>
+
+    </div>
+    </div>
+    </div>
   </body>
 </html>

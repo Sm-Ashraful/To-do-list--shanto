@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from datetime import datetime
 import urllib.parse
 import json
 import os
@@ -127,33 +128,52 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             # Load tasks for the current user
             user_tasks = tasks.get(user, [])
             total_tasks = len(user_tasks)
-            completed_tasks = sum(1 for task in user_tasks if task.get("completed", False))
+            completed_tasks = sum(1 for task in user_tasks if task.get("status") == "Completed")
 
             # Generate task list with Edit, Delete, and Status Selector
             task_list = "".join([f"""
-                <li>
-                    <span style="{'text-decoration: line-through;' if task.get('status') == 'Completed' else ''}">
-                        {task['text']} (Due: {task.get('due_date', 'No due date')} at {task.get('due_time', 'No due time')})
-                    </span>
-                    <form method="GET" action="/edit-task" style="display:inline;">
-                        <input type="hidden" name="task_id" value="{idx}">
-                        <button type="submit">Edit</button>
-                    </form>
-                    <form method="POST" action="/delete-task" style="display:inline;">
-                        <input type="hidden" name="task_id" value="{idx}">
-                        <button type="submit">Delete</button>
-                    </form>
-                    <form method="POST" action="/update-status" style="display:inline;">
-                        <input type="hidden" name="task_id" value="{idx}">
-                        <select name="status" onchange="this.form.submit()">
-                            <option value="Not Started" {'selected' if task.get('status') == 'Not Started' else ''}>Not Started</option>
-                            <option value="In Progress" {'selected' if task.get('status') == 'In Progress' else ''}>In Progress</option>
-                            <option value="Completed" {'selected' if task.get('status') == 'Completed' else ''}>Completed</option>
-                        </select>
-                    </form>
+                <li class="task-item">
+                    <div class="task-date">
+                        
+            """ + (
+                f"""
+                        <div class="date-block">
+                            <p class="day">{datetime.strptime(task.get('due_date', ''), '%Y-%m-%d').day}</p>
+                            <p class="month_name">{datetime.strptime(task.get('due_date', ''), '%Y-%m-%d').strftime('%b')}</p>
+                        </div>
+                            <p class="year">{datetime.strptime(task.get('due_date', ''), '%Y-%m-%d').year}</p>
+                """ if task.get('due_date') else """
+                            <p class="day">No due date</p>
+                            <p class="month_name"></p>
+                            <p class="year"></p>
+                """
+            ) + f"""
+                    </div>
+                    <p class="task" style="{'text-decoration: line-through; color: #32be8f; foxr-weight: 500;' if task.get('status') == 'Completed' else ''}">
+                        {task['text']}
+                    </p>
+                    <div class="buttons">
+                        <form method="GET" action="/edit-task">
+                            <input type="hidden" name="task_id" value="{idx}">
+                            <button type="submit" class="edit">Edit</button>
+                        </form>
+                        <form method="POST" action="/delete-task">
+                            <input type="hidden" name="task_id" value="{idx}">
+                            <button type="submit" class="delete">Delete</button>
+                        </form>
+                        <form method="POST" action="/update-status">
+                            <input type="hidden" name="task_id" value="{idx}">
+                            <select name="status" onchange="this.form.submit()">
+                                <option value="Not Started" {'selected' if task.get('status') == 'Not Started' else ''}>Not Started</option>
+                                <option value="In Progress" {'selected' if task.get('status') == 'In Progress' else ''}>In Progress</option>
+                                <option value="Completed" {'selected' if task.get('status') == 'Completed' else ''}>Completed</option>
+                            </select>
+                        </form>
+                    </div>
                 </li>
             """ for idx, task in enumerate(user_tasks)])
 
+            # After generating the task list, read the HTML template and inject the task list
             with open("tasks.html", "r") as f:
                 html = f.read().replace("{TASK_LIST}", task_list)
                 # Add total tasks and completed tasks to the HTML
@@ -161,6 +181,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 html = html.replace("{COMPLETED_TASKS}", str(completed_tasks))
 
                 self.wfile.write(html.encode())
+
 
 
         elif parsed_path.path == "/edit-task" and user and "task_id" in query_params:
@@ -184,6 +205,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 html = html.replace("{{ task_status }}", task_status)
 
                 self.wfile.write(html.encode())
+
             else:
                 self.send_response(404)
                 self.end_headers()
@@ -253,14 +275,34 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Location", "/tasks")
                 self.end_headers()
 
-            if parsed_path.path == "/update-status":
+            elif parsed_path.path == "/update-status" and user:
+                # Get the task ID and new status from the form data
                 task_id = int(data.get("task_id")[0])
                 new_status = data.get("status")[0]
-                tasks[user][task_id]['status'] = new_status
-                save_tasks()
-                self.send_response(303)
-                self.send_header("Location", "/tasks")
-                self.end_headers()
+                
+                # Load the tasks for the current user
+                user_tasks = tasks.get(user, [])
+                
+                if task_id < len(user_tasks):
+                    # Update the task's status
+                    user_tasks[task_id]["status"] = new_status
+                    
+                    # Recalculate completed tasks
+                    total_tasks = len(user_tasks)
+                    completed_tasks = sum(1 for task in user_tasks if task.get("status") == "Completed")
+                    
+                    # Save updated tasks
+                    save_tasks()
+                    
+                    # Send response and redirect back to the tasks page
+                    self.send_response(303)
+                    self.send_header("Location", "/tasks")
+                    self.end_headers()
+                else:
+                    # Handle case where the task ID is invalid
+                    self.send_response(404)
+                    self.end_headers()
+
 
             elif parsed_path.path == "/edit-task":
                 task_id = int(data.get("task_id")[0])
